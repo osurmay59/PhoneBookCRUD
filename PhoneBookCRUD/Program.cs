@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using PhoneBookCRUD.Data;
 using PhoneBookCRUD.Models;
@@ -15,6 +16,15 @@ var connectionString = builder.Configuration.GetConnectionString("PostgreSQLConn
 builder.Services.AddDbContext<ClientsDb>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.AddCors(options => options.AddPolicy("AllowOrigin",
+                                    builder => builder.AllowAnyOrigin()
+                                                      .AllowAnyHeader()
+                                                      .AllowAnyMethod()));
+
+
+
+builder.Services.Configure<JsonOptions>(opt => opt.SerializerOptions.PropertyNamingPolicy = null) ;
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -26,34 +36,34 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("/clients/", async (Client e, ClientsDb db) =>
+app.MapPost("api/v1/clients", async (Client e, ClientsDb db) =>
 {
     db.Clients.Add(e);
     await db.SaveChangesAsync();
 
-    return Results.Created($"/client/{e.PhoneNumber}", e);
+    return Results.Created($"api/v1/clients/{e.PhoneNumber}", e);
 }
 );
 
-app.MapGet("/clients/{PhoneNumber:int}", async (int PhoneNumber, ClientsDb db) =>
+app.MapGet("api/v1/clients/{Id:int}", async (int Id, ClientsDb db) =>
 {
-    return await db.Clients.FindAsync(PhoneNumber)
+    return await db.Clients.FindAsync(Id)
         is Client e
         ? Results.Ok(e)
-        : Results.NotFound(PhoneNumber);
+        : Results.NotFound(Id);
 });
 
-app.MapGet("/clients", async (ClientsDb db) => await db.Clients.ToListAsync());
+app.MapGet("api/v1/clients", async (ClientsDb db) => await db.Clients.ToListAsync());
 
-app.MapPut("/clients/{PhoneNumber:int}", async (int PhoneNumber, Client e, ClientsDb db) =>
+app.MapPut("api/v1/clients/{Id:int}", async (int Id, Client e, ClientsDb db) =>
 {
-    if (e.PhoneNumber != PhoneNumber)
-        return Results.BadRequest();
+  
+       
 
-    var client = await db.Clients.FindAsync(PhoneNumber);
+    var client = await db.Clients.FindAsync(Id);
 
     if (client is null) return Results.NotFound();
-
+    client.PhoneNumber = e.PhoneNumber;
     client.FirstName = e.FirstName;
     client.LastName = e.LastName;
     client.Comments = e.Comments;
@@ -65,9 +75,9 @@ app.MapPut("/clients/{PhoneNumber:int}", async (int PhoneNumber, Client e, Clien
 
 });
 
-app.MapDelete("/clients/{PhoneNumber:int}", async (int PhoneNumber, ClientsDb db) =>
+app.MapDelete("api/v1/clients/{Id:int}", async (int Id, ClientsDb db) =>
 {
-    var client = await db.Clients.FindAsync(PhoneNumber);
+    var client = await db.Clients.FindAsync(Id);
 
     if (client is null) return Results.NotFound();
     
@@ -78,9 +88,8 @@ app.MapDelete("/clients/{PhoneNumber:int}", async (int PhoneNumber, ClientsDb db
     return Results.NoContent();
 });
 
-app.Run();
 
-internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+
+app.UseCors("AllowOrigin");
+
+app.Run();

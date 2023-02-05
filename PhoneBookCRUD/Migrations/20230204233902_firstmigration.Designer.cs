@@ -11,7 +11,7 @@ using PhoneBookCRUD.Data;
 namespace PhoneBookCRUD.Migrations
 {
     [DbContext(typeof(ClientsDb))]
-    [Migration("20230129214720_firstmigration")]
+    [Migration("20230204233902_firstmigration")]
     partial class firstmigration
     {
         /// <inheritdoc />
@@ -26,11 +26,11 @@ namespace PhoneBookCRUD.Migrations
 
             modelBuilder.Entity("PhoneBookCRUD.Models.Client", b =>
                 {
-                    b.Property<int>("PhoneNumber")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PhoneNumber"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Comments")
                         .IsRequired()
@@ -47,7 +47,10 @@ namespace PhoneBookCRUD.Migrations
                     b.Property<int>("NotShow")
                         .HasColumnType("integer");
 
-                    b.HasKey("PhoneNumber");
+                    b.Property<int>("PhoneNumber")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
 
                     b.ToTable("Clients");
                 });

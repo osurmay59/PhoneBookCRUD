@@ -15,8 +15,9 @@ namespace PhoneBookCRUD.Migrations
                 name: "Clients",
                 columns: table => new
                 {
-                    PhoneNumber = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PhoneNumber = table.Column<int>(type: "integer", nullable: false),
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
                     Comments = table.Column<string>(type: "text", nullable: false),
@@ -24,7 +25,7 @@ namespace PhoneBookCRUD.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Clients", x => x.PhoneNumber);
+                    table.PrimaryKey("PK_Clients", x => x.Id);
                 });
         }
 
